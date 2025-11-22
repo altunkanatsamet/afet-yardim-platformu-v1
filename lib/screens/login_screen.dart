@@ -1,7 +1,8 @@
 // FILE: lib/screens/login_screen.dart
 
-import 'home_screen.dart';
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
+import 'register_screen.dart'; // Kayıt ekranını çağırdık
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -52,11 +53,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 24),
               
-              // BUTON
-         // BUTON
+              // GİRİŞ BUTONU
               ElevatedButton(
                 onPressed: () {
-                  // Sanki giriş yapmış gibi Ana Ekrana git:
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -68,6 +67,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
                 child: const Text("Giriş Yap"),
+              ),
+
+              const SizedBox(height: 20), // Boşluk
+
+              // İŞTE O KAYIP BUTON BURADA 👇
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                  );
+                },
+                child: const Text("Hesabın yok mu? Kayıt Ol", style: TextStyle(fontSize: 16)),
               ),
             ],
           ),

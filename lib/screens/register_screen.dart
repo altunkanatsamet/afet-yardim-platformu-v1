@@ -1,6 +1,7 @@
 // FILE: lib/screens/register_screen.dart
 
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart'; // Az önce yazdığımız servisi çağırdık
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -11,6 +12,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
+  final _authService = AuthService(); // Servisi başlattık
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -34,71 +36,68 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                "Hesap Oluştur",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28, 
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Afet anında hızlı iletişim için kaydını tamamla.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
+              const Text("Hesap Oluştur", textAlign: TextAlign.center, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
               const SizedBox(height: 30),
 
-              // 1. İSİM SOYİSİM
+              // İSİM
               TextField(
                 controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: "Adın Soyadın",
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                decoration: InputDecoration(labelText: "Adın Soyadın", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
               ),
               const SizedBox(height: 16),
 
-              // 2. E-POSTA
+              // E-POSTA
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: "E-posta Adresi",
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                decoration: InputDecoration(labelText: "E-posta Adresi", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
               ),
               const SizedBox(height: 16),
 
-              // 3. ŞİFRE
+              // ŞİFRE
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Şifre Belirle",
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                decoration: InputDecoration(labelText: "Şifre Belirle", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
               ),
               const SizedBox(height: 30),
 
-              // 4. KAYIT OL BUTONU (Artık sabit renk)
+              // KAYIT OL BUTONU
               ElevatedButton(
-                onPressed: _isLoading ? null : () {
-                  // Firebase kayıt kodları buraya gelecek
-                  print("Kayıt deneniyor: ${_nameController.text}");
+                onPressed: _isLoading ? null : () async {
+                  // 1. Yükleniyor simgesini aç
+                  setState(() => _isLoading = true);
+
+                  // 2. Servise git ve kayıt olmaya çalış
+                  String? error = await _authService.registerUser(
+                    _emailController.text.trim(),
+                    _passwordController.text.trim(),
+                  );
+
+                  // 3. İşlem bitince yükleniyor simgesini kapat
+                  setState(() => _isLoading = false);
+
+                  if (error == null) {
+                    // BAŞARILI! (Hata yok)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Kayıt Başarılı! Giriş yapabilirsiniz."), backgroundColor: Colors.green),
+                    );
+                    Navigator.pop(context); // Giriş ekranına geri yolla
+                  } else {
+                    // HATA VAR!
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Hata: $error"), backgroundColor: Colors.red),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red.shade700,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text("Hesap Oluştur", style: TextStyle(fontSize: 18)),
+                child: _isLoading 
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text("Hesap Oluştur", style: TextStyle(fontSize: 18)),
               ),
             ],
           ),
